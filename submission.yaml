@@ -1,0 +1,8 @@
+# AURA harness entry for Physical-Engineering's Last Exam.
+# Plan -> work -> verify -> repair on the reference engine, see serve.py.
+name: aura-harness
+model_api: google-cloud/gemini-4-argon
+install: >-
+  uv venv --python 3.12 /opt/harness/venv
+  && uv pip install --python /opt/harness/venv/bin/python -r {src}/requirements.txt
+serve: /opt/harness/venv/bin/python {src}/serve.py
