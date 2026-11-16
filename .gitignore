@@ -1,0 +1,14 @@
+# Local secrets and runtime scratch (never ignore artifacts/)
+.env
+*.env
+!.env.example
+.proxy_key
+.vertex_sa_key.json
+*.pem
+*.key
+__pycache__/
+*.py[cod]
+.pytest_cache/
+runs/
+.staged-by-kit
+/tmp/

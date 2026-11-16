@@ -1,39 +1,29 @@
-"""AURA harness: plan, work, verify, repair, on the reference engine.
+"""AURA harness: config-driven plan, work, verify, repair orchestrator."""
 
-Four phases run inside the task container, each with its own share of the time
-budget:
+from __future__ import annotations
 
-1. PLAN:   inspect the task files, write a deliverable-by-deliverable plan
-           (path, format, how to verify) to a plan file.
-2. WORK:   execute the plan, writing each deliverable early and improving it.
-3. VERIFY: a fresh reviewer conversation opens every deliverable, checks it
-           against the plan and the task, replies PASS or lists concrete gaps.
-4. REPAIR: gaps go back to the worker. Loop while time remains.
-
-The engine (streaming, tool execution, context compaction, retries, MCP) is the
-reference custom-openai harness, imported unchanged as `engine`. This file only
-decides what to ask it, when, and for how long: `PhaseAgent.run_phase` is the
-engine's own loop with a per-phase deadline added.
-"""
-
-import asyncio
-import os
 import sys
 import time
 from typing import Any
 
 import engine
 import taskbridge
+from aura_harness.config import HarnessConfig, load_config, validate_runtime_env
+from aura_harness.stream import merge_or_append_user, visible
+from aura_harness.telemetry import TelemetryLogger
 
+
+DEFAULT_CONFIG = load_config()
 PLAN_PATH = "/tmp/aura_plan.md"
-VERIFY_SHARE = float(os.environ.get("AURA_VERIFY_SHARE", "0.30"))
-MAX_REPAIR_ROUNDS = int(os.environ.get("AURA_MAX_REPAIR_ROUNDS", "3"))
-MIN_REPAIR_SEC = 600  # no repair round with less than 10 min left
-WRAP_SEC = 300  # kept for the final summary
+VERIFY_SHARE = DEFAULT_CONFIG.phase_budgets.verify_share
+MAX_REPAIR_ROUNDS = DEFAULT_CONFIG.phase_budgets.max_repair_rounds
+MIN_REPAIR_SEC = DEFAULT_CONFIG.phase_budgets.min_repair_sec
+WRAP_SEC = DEFAULT_CONFIG.phase_budgets.wrap_sec
 REVIEW_TOOLS = ("bash", "read_file", "mcp_find", "mcp_call")
 
 
 def log(msg: str) -> None:
+  """Writes one harness log line to stderr."""
   print(f"aura: {msg}", file=sys.stderr, flush=True)
 
 
@@ -80,10 +70,16 @@ Fix each one, reopen the files to confirm, then answer with your updated summary
 
 
 class PhaseAgent(engine.Agent):
-  """The engine's agent with a per-phase deadline on top of the task deadline."""
+  """The engine's agent with per-phase budgets and safe user-turn merging."""
 
-  def __init__(self, session: taskbridge.Session):
-    super().__init__(session)
+  def __init__(
+      self,
+      session: taskbridge.Session,
+      *,
+      config: HarnessConfig | None = None,
+      telemetry: TelemetryLogger | None = None,
+  ):
+    super().__init__(session, config=config, telemetry=telemetry)
     self.phase_end: float | None = None
 
   def phase_left(self) -> float | None:
@@ -95,11 +91,9 @@ class PhaseAgent(engine.Agent):
     return task if phase is None else min(task, phase)
 
   async def run_phase(self, prompt: str, budget: float | None) -> str:
-    """Appends `prompt` and runs the tool loop until the model answers or the
-    phase budget runs out. The engine's compaction, retries and tool handling
-    are reused as-is."""
+    """Runs one budgeted phase without creating consecutive user-role stalls."""
     self.phase_end = None if budget is None else time.monotonic() + budget
-    self.messages.append({"role": "user", "content": prompt})
+    merge_or_append_user(self.messages, prompt)
     nudges, head = 0, ""
     while True:
       left = self.phase_left()
@@ -109,44 +103,54 @@ class PhaseAgent(engine.Agent):
         reply = await self.complete(head=head)
       except engine.OutOfTime:
         return await self.finish(
-            "Time is almost up, and the model is not answering.")
+            "Time is almost up, and the model is not answering."
+        )
       except engine.CutOff:
         return await self.finish("Time for this step is almost up.")
       arguments = [engine.parse_arguments(c) for c in reply.calls.values()]
       if reply.text or reply.calls:
         self.messages.append(reply.message())
-      text = engine.visible(head + reply.text)
+      text = visible(head + reply.text)
       if text:
         self.session.final_message = text
       if not reply.calls:
-        if engine.visible(reply.text) and reply.finish == "length":
+        if visible(reply.text) and reply.finish == "length":
           nudges, head = 0, head + reply.text
           self.messages.append({
               "role": "user",
               "content": (
                   f"Your reply was cut off at the {self.max_output}-token"
                   " output limit. Continue where it stopped, and put long"
-                  " content in files with write_file rather than in a reply."),
+                  " content in files with write_file rather than in a reply."
+              ),
           })
           continue
-        if engine.visible(reply.text) or nudges >= 2:
+        if visible(reply.text) or nudges >= 2:
           return text or self.session.final_message
         nudges += 1
         self.messages.append({
             "role": "user",
-            "content": ("Continue this step; when it is done, answer with "
-                        "your summary."),
+            "content": (
+                "Continue this step; when it is done, answer with "
+                "your summary."
+            ),
         })
         continue
       nudges, head = 0, ""
       for call, args in zip(reply.calls.values(), arguments):
-        result = (await self.run_tool(call["name"], args)
-                  if isinstance(args, dict) else args)
+        result = (
+            await self.run_tool(call["name"], args)
+            if isinstance(args, dict)
+            else args
+        )
         if reply.finish == "length" and isinstance(args, str):
-          result += (f" Your reply hit the {self.max_output}-token output"
-                     " limit; write large files in parts.")
+          result += (
+              f" Your reply hit the {self.max_output}-token output"
+              " limit; write large files in parts."
+          )
         self.messages.append(
-            {"role": "tool", "tool_call_id": call["id"], "content": result})
+            {"role": "tool", "tool_call_id": call["id"], "content": result}
+        )
       left = self.phase_left()
       if left is not None:
         self.messages[-1]["content"] += f"\n[{int(left // 60)} minutes left for this step]"
@@ -155,68 +159,138 @@ class PhaseAgent(engine.Agent):
 
 
 def is_pass(verdict: str) -> bool:
+  """Returns True if the independent reviewer reported PASS or empty verdict."""
   return verdict.strip("*_. \r\n\t").upper() in ("", "PASS")
 
 
-async def solve(session: taskbridge.Session) -> str:
+async def solve(
+    session: taskbridge.Session,
+    *,
+    config: HarnessConfig | None = None,
+    telemetry: TelemetryLogger | None = None,
+) -> str:
+  """Executes Plan -> Work -> Verify <-> Repair phases under configured budgets."""
+  cfg = config or load_config()
+  pb = cfg.phase_budgets
+  env_report = validate_runtime_env()
+  for warning in env_report.warnings:
+    log(f"env notice: {warning}")
+  tel = telemetry or TelemetryLogger(
+      enabled=cfg.telemetry.enabled,
+      path=cfg.telemetry.path,
+      summary_path=cfg.telemetry.summary_path,
+  )
+
   left = session.time_left()
-  log(f"task: workdir {session.workdir}, model {engine.MODEL}, "
-      f"{len(session.mcp_servers)} MCP server(s), {left} s")
+  log(
+      f"task: workdir {session.workdir}, model {engine.MODEL}, "
+      f"{len(session.mcp_servers)} MCP server(s), {left} s"
+  )
+  tel.emit(
+      "session_start",
+      model=engine.MODEL,
+      mcp_count=len(session.mcp_servers),
+      time_budget_s=round(left, 2) if left is not None else None,
+  )
 
-  worker = PhaseAgent(session)
-  mcp = await worker.connect_mcp()
-  worker.finish_margin = (engine.FINISH_MARGIN_SEC if left is None
-                          else min(engine.FINISH_MARGIN_SEC, max(left, 0) / 4))
-  system = {
-      "role": "system",
-      "content": engine.SYSTEM.format(
-          workdir=session.workdir, mcp=mcp,
-          minutes=int(left / 60) if left else "unlimited"),
-  }
-  worker.messages = [system, {"role": "user", "content": session.instruction}]
+  status = "completed"
+  summary = ""
+  try:
+    worker = PhaseAgent(session, config=cfg, telemetry=tel)
+    mcp = await worker.connect_mcp()
+    base_margin = float(cfg.model_limits.finish_margin_sec)
+    worker.finish_margin = (
+        base_margin
+        if left is None
+        else min(base_margin, max(left, 0.0) / 4.0)
+    )
+    system = {
+        "role": "system",
+        "content": engine.SYSTEM.format(
+            workdir=session.workdir,
+            mcp=mcp,
+            minutes=int(left / 60) if left else "unlimited",
+        ),
+    }
+    worker.messages = [system, {"role": "user", "content": session.instruction}]
 
-  # PLAN: 10% of the time, at most 20 minutes
-  plan_budget = None if left is None else min(0.10 * left, 1200)
-  log(f"plan: budget {plan_budget}")
-  await worker.run_phase(PLANNER.format(plan=PLAN_PATH), plan_budget)
+    # PLAN
+    plan_budget = (
+        None if left is None else min(pb.plan_share * left, float(pb.plan_max_sec))
+    )
+    log(f"plan: budget {plan_budget}")
+    t_phase = time.monotonic()
+    await worker.run_phase(PLANNER.format(plan=PLAN_PATH), plan_budget)
+    tel.record_phase("plan", "done", plan_budget, time.monotonic() - t_phase)
 
-  # WORK: all remaining time except the verify share
-  left = session.time_left()
-  work_budget = None if left is None else left * (1 - VERIFY_SHARE)
-  log(f"work: budget {work_budget}")
-  summary = await worker.run_phase(WORKER.format(plan=PLAN_PATH), work_budget)
-  session.final_message = summary or session.final_message
-
-  # VERIFY / REPAIR
-  for round_no in range(1, MAX_REPAIR_ROUNDS + 1):
+    # WORK
     left = session.time_left()
-    if left is not None and left < MIN_REPAIR_SEC + WRAP_SEC:
-      log(f"verify: skipped, {int(left)} s left")
-      break
-    v_budget = None if left is None else min(0.35 * (left - WRAP_SEC), 900)
-    log(f"verify round {round_no}: budget {v_budget}")
-    reviewer = PhaseAgent(session)
-    await reviewer.connect_mcp()
-    reviewer.finish_margin = worker.finish_margin
-    reviewer.tools = [t for t in reviewer.tools
-                      if t["function"]["name"] in REVIEW_TOOLS]
-    reviewer.messages = [system, {"role": "user", "content": session.instruction}]
-    verdict = (await reviewer.run_phase(
-        VERIFIER.format(plan=PLAN_PATH, summary=summary or ""), v_budget) or "").strip()
-    log(f"verify round {round_no}: {verdict[:400]!r}")
-    session.final_message = summary or session.final_message  # not the verdict
-    if is_pass(verdict):
-      break
-    left = session.time_left()
-    if left is not None and left < MIN_REPAIR_SEC + WRAP_SEC:
-      break
-    r_budget = None if left is None else left - WRAP_SEC
-    log(f"repair round {round_no}: budget {r_budget}")
-    summary = (await worker.run_phase(REPAIR.format(gaps=verdict), r_budget)
-               or summary)
+    work_budget = None if left is None else left * (1.0 - pb.verify_share)
+    log(f"work: budget {work_budget}")
+    t_phase = time.monotonic()
+    summary = await worker.run_phase(WORKER.format(plan=PLAN_PATH), work_budget)
+    tel.record_phase("work", "done", work_budget, time.monotonic() - t_phase)
     session.final_message = summary or session.final_message
 
-  return summary or session.final_message
+    # VERIFY / REPAIR
+    for round_no in range(1, pb.max_repair_rounds + 1):
+      left = session.time_left()
+      if left is not None and left < pb.min_repair_sec + pb.wrap_sec:
+        log(f"verify: skipped, {int(left)} s left")
+        tel.record_phase(f"verify_{round_no}", "skipped_low_time", 0.0, 0.0)
+        break
+      v_budget = (
+          None
+          if left is None
+          else min(pb.verify_round_share * (left - pb.wrap_sec), float(pb.verify_max_sec))
+      )
+      log(f"verify round {round_no}: budget {v_budget}")
+      t_phase = time.monotonic()
+      reviewer = PhaseAgent(session, config=cfg, telemetry=tel)
+      await reviewer.connect_mcp()
+      reviewer.finish_margin = worker.finish_margin
+      reviewer.tools = [
+          t for t in reviewer.tools if t["function"]["name"] in REVIEW_TOOLS
+      ]
+      reviewer.messages = [system, {"role": "user", "content": session.instruction}]
+      verdict = (
+          await reviewer.run_phase(
+              VERIFIER.format(plan=PLAN_PATH, summary=summary or ""), v_budget
+          )
+          or ""
+      ).strip()
+      passed = is_pass(verdict)
+      tel.record_phase(
+          f"verify_{round_no}",
+          "pass" if passed else "gaps",
+          v_budget,
+          time.monotonic() - t_phase,
+      )
+      log(f"verify round {round_no}: {verdict[:400]!r}")
+      session.final_message = summary or session.final_message
+      if passed:
+        break
+      left = session.time_left()
+      if left is not None and left < pb.min_repair_sec + pb.wrap_sec:
+        tel.record_phase(f"repair_{round_no}", "skipped_low_time", 0.0, 0.0)
+        break
+      r_budget = None if left is None else left - pb.wrap_sec
+      log(f"repair round {round_no}: budget {r_budget}")
+      t_phase = time.monotonic()
+      summary = (
+          await worker.run_phase(REPAIR.format(gaps=verdict), r_budget)
+          or summary
+      )
+      tel.record_phase(f"repair_{round_no}", "done", r_budget, time.monotonic() - t_phase)
+      session.final_message = summary or session.final_message
+
+    return summary or session.final_message
+  except Exception as exc:
+    status = f"error:{type(exc).__name__}"
+    raise
+  finally:
+    tel.outcome = {"summary_chars": len(summary or session.final_message or "")}
+    tel.write_summary(model=engine.MODEL, status=status)
 
 
 if __name__ == "__main__":

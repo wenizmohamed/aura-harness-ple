@@ -1,0 +1,31 @@
+{
+  "phase_budgets": {
+    "plan_share": 0.10,
+    "plan_max_sec": 1200,
+    "verify_share": 0.30,
+    "verify_round_share": 0.35,
+    "verify_max_sec": 900,
+    "max_repair_rounds": 3,
+    "min_repair_sec": 600,
+    "wrap_sec": 300
+  },
+  "model_limits": {
+    "max_output_tokens": 32000,
+    "min_output_tokens": 1024,
+    "compact_at_tokens": 150000,
+    "tool_result_chars": 30000,
+    "direct_mcp_chars": 40000,
+    "max_tools": 128,
+    "keep_recent_results": 12,
+    "unread_keep": 600,
+    "context_margin": 1024,
+    "finish_margin_sec": 180,
+    "request_timeout_sec": 900,
+    "retry_waits": [5, 15, 30, 60, 120]
+  },
+  "telemetry": {
+    "enabled": true,
+    "path": "/tmp/aura_telemetry.jsonl",
+    "summary_path": "/tmp/aura_summary.json"
+  }
+}
