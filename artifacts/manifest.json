@@ -1,0 +1,171 @@
+{
+  "format": 1,
+  "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+  "created": "2026-11-16T15:03:40Z",
+  "harness": {
+    "name": "aura-harness",
+    "model_api": "google-cloud/gemini-4-argon",
+    "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+    "files": {
+      ".env.example": "100644 02ad3b5580a57b011f6738b3da32369d878c9e46",
+      ".gitattributes": "100644 46526f6accedfe14ec426977a774ab9c5e0e442c",
+      ".github/workflows/ci.yml": "100644 bdc4fcf0c843546be96ae9863bb1ae0dc9f82e91",
+      ".gitignore": "100644 42a42fb97342eebf264f22bb794e7b782ba3b38e",
+      "LICENSE": "100644 680e9b3265f1a4c8a0c8b0483595a3576f386d9c",
+      "README.md": "100644 a3460a82be051fa445cac7f4040705597ee339dc",
+      "SECURITY.md": "100644 26678d11f18f1e673cfe351f640bb939ba312a4a",
+      "aura_harness/__init__.py": "100644 15e15b87ee43d1727dba411009768a6bbed0dfc4",
+      "aura_harness/compaction.py": "100644 ddef3b06b931926b8d078d0bdf8441c68e558235",
+      "aura_harness/config.py": "100644 a1c2cd069693ff0c2d9f96c664117e4b31136b0e",
+      "aura_harness/mcp_tools.py": "100644 8eb10c6013faf664a1bd16f7f85933f204f62b6d",
+      "aura_harness/stream.py": "100644 2110904895eaead4d1115a1c78e9695ff0561363",
+      "aura_harness/telemetry.py": "100644 4c6e249e300c9af57530abef110470bfa23fe508",
+      "engine.py": "100644 f2c94c89eaa49a936be022ee823f82a5131ec63b",
+      "harness_config.json": "100644 425e805c5a065839d95573ec297ba366b8562fdd",
+      "requirements-dev.txt": "100644 5e11fc67f33f0128fa47f3951cf352ae021058f0",
+      "requirements.txt": "100644 13ba6dbe5a230d71da63dd42ee49e86f580056dc",
+      "scripts/validate.py": "100644 fe3cead08a6ab1bd4a1847d527e5e4bb124f6370",
+      "serve.py": "100644 16a2bfe305a6baef13205f620b77f1d91eed3a15",
+      "submission.yaml": "100644 1fdc7a131c312ba667e964d8ff34abe664060083",
+      "taskbridge.py": "100644 26cc3d6cf8dbcaed859731ce9a6881f4ca8bfe40",
+      "tests/conftest.py": "100644 7c35e97259f05ed3893c895209dd560a464b708b",
+      "tests/test_config_and_telemetry.py": "100644 14602d1dc6c7c9e36fa3a2bcb344ccce05b23aa9",
+      "tests/test_retry_and_compaction.py": "100644 8c4e2ff96a74e483099a6237fca9a17374a43e5c",
+      "tests/test_serve_phases.py": "100644 8019bd3d3278984b72332ef5ea7aa5e0bbb9c50d",
+      "tests/test_stream_and_parsing.py": "100644 7088a9bfff807334ca2bfe1a54f65140ed9b1221",
+      "tests/test_taskbridge.py": "100644 2e6fe900733a76be360edba4150d7a67b6aa47fa"
+    },
+    "commit": "edd3de25bbb61fd13026a196b813333b378b2087",
+    "dirty": false
+  },
+  "tasks": {
+    "data-hall-mep-routing": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "aura-harness-20261116-065044",
+      "trial": "data-hall-mep-routing__D85QpFD",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "files": {
+        "app/files/dc_model__hall_seed000_d000__mep_routing/output/solution.py": "729198202d8d58f13b61ce0b8a2b112713e0961f"
+      },
+      "final_message": "48006076a45711cc2e6e099d94019a70e73ea0a0",
+      "deleted": [],
+      "skipped": []
+    },
+    "lv-cable-sizing": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "aura-harness-20261116-065044",
+      "trial": "lv-cable-sizing__3twrY6Y",
+      "ended": "ok",
+      "reward": 0.78654,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "files": {
+        "filesystem/electrical__lv_cable_sizing__blind/output/submission.zip": "ce9b384186b8dc5f9e088295504fa80609703aa2"
+      },
+      "final_message": "7cd67c59e0f82615bc3c5c7857fcb24accce6b39",
+      "deleted": [],
+      "skipped": []
+    },
+    "roof-deck-design": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "aura-harness-20261116-065044",
+      "trial": "roof-deck-design__95quPdD",
+      "ended": "ok",
+      "reward": 0.342857,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "files": {
+        "filesystem/final_batch4__structural_task7_roof_deck_design__blind/output/submission.zip": "45ecc9544b6edc408a89f73d5ef3021b1b8584a9"
+      },
+      "final_message": "7854d1130244d0ee288e7a58387ea3410f770aa1",
+      "deleted": [],
+      "skipped": []
+    },
+    "wind-diaphragm-shear": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "aura-harness-20261116-065044",
+      "trial": "wind-diaphragm-shear__2QaADhw",
+      "ended": "ok",
+      "reward": 0.280952,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "files": {
+        "filesystem/final_batch4__structural_task5_wind_diaphragm_shear__blind/output/submission.zip": "843fe9c170719e97cf65492f64fccac76538ebf9"
+      },
+      "final_message": "2a8a32186d40a4aabb8f749625c16c8d349bb96c",
+      "deleted": [],
+      "skipped": []
+    },
+    "data-hall-mep-routing-offset": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "aura-harness-batch2-20261116-090739",
+      "trial": "data-hall-mep-routing-offset__dXwTx2z",
+      "ended": "ok",
+      "reward": 0.0,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "files": {
+        "app/files/dc_model__hall_seed005_d100__mep_routing/output/solution.py": "8c62a383d28f093b0da98f546a7f288e0251b008"
+      },
+      "final_message": "c508eb81ce5fff801fe441133f280853fdee1472",
+      "deleted": [],
+      "skipped": []
+    },
+    "fire-test-validation-memo": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "aura-harness-batch2-20261116-090739",
+      "trial": "fire-test-validation-memo__RKeQE5b",
+      "ended": "ok",
+      "reward": 0.471154,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "files": {
+        "app/files/output/CFDME-2025-041_validation_memo_revA.docx": "f8c9c47e83384c2f33b5a2cda145121cf2d650fc"
+      },
+      "final_message": "edde3d91f6e9ebb945619aa69679f63c91936eda",
+      "deleted": [],
+      "skipped": []
+    },
+    "landscape-sheet-revision": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "aura-harness-batch2-20261116-090739",
+      "trial": "landscape-sheet-revision__Yz6XNzS",
+      "ended": "ok",
+      "reward": 0.571429,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "files": {
+        "app/files/output/DSR_Ph3_Memo_to_Callaway_10312026.docx": "4dba45ea6bc4d7cd5ed0103e82625dee0ec3bbc3",
+        "app/files/output/DSR_Ph3_Memo_to_Callaway_10312026.md": "7ff7a65318566e90d11a8bdbac8c9d2bfd8f72f1",
+        "app/files/output/DSR_Ph3_Memo_to_Callaway_10312026.pdf": "c19aceec8436d53a59f607c8f739837ffed25c93"
+      },
+      "final_message": "afb353aa867187f3c96f51f5b355e2aeb51ee10d",
+      "deleted": [],
+      "skipped": []
+    },
+    "seismic-diaphragm-shear": {
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "run": "aura-harness-batch2-20261116-090739",
+      "trial": "seismic-diaphragm-shear__aJHZMP2",
+      "ended": "ok",
+      "reward": 0.305882,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "files": {
+        "filesystem/final_batch4__structural_task6_seismic_diaphragm_shear__blind/output/submission.zip": "07551e5439c5c4501b38898e30da1d67667433f6"
+      },
+      "final_message": "11ea7f33f4c4f1b65ee270ce5cf46ed76969604d",
+      "deleted": [],
+      "skipped": []
+    },
+    "data-center-site-model": {
+      "run": "aura-harness-batch2-20261116-160111",
+      "trial": "data-center-site-model__guexG7B",
+      "ended": "ok",
+      "reward": 1.0,
+      "tree": "f4d90ddc8718694eee2dcd356e7d5f207805c45afa4db6701dbb715b75a33435",
+      "dev_set": "85ad6d96fbf76ee64d9fb6339b3bf342b07128a2ebadc0a10f008c95dac01a48",
+      "files": {
+        "app/files/frontier__DCBim__p6_002/submission/model.ifc": "2488bac3fa54b1455bcbf491cd5b76fbc6e04c96"
+      },
+      "final_message": "f32af47bd17464a3795b54a044ebd629179b0bcd",
+      "deleted": [],
+      "skipped": []
+    }
+  }
+}

@@ -1,0 +1,43 @@
+The delegated lateral design package for **Building B** at the Continental Divide Data Center (Lewis and Clark County, Montana) has been completed, verified against all project criteria and library standards, and written to:
+
+* **Deliverable archive**: `/filesystem/final_batch4__structural_task6_seismic_diaphragm_shear__blind/output/submission.zip`
+
+The zip archive contains the five required files at the root level (with no enclosing folder):
+1. `design_record.json` — Complete machine-readable design selections, seismic basis, resolved conflicts, 12-case wall line forces `F_x`, chord and collector design forces, parapet cantilever transfer and out-of-plane wall anchorage forces, envelope unit shears per zone, and installed cost.
+2. `diaphragm_plan.dxf` — AutoCAD DXF plan drawings (in feet, `INSUNITS = 2`) with two side-by-side roof plans (`E-W` loading at origin `(0, 0)` and `N-S` loading at `(320, 0)`), containing all required layers (`DIAPHRAGM_SHEAR`, `WALL_FORCE`, `CHORD`, `COLLECTOR`, `DECK_ZONE`, `GRID`, `TITLE`, plus `OPENING`, `WALL`, `NOTE`, `DIM`), distributed diaphragm forces `w_px` (plf), zone fastener patterns and envelope unit shears (plf), applied wall shear forces `F_x` (kips), chord/collector/drag-strut schedules and axial forces (kips), parapet transfer and wall anchorage callouts, and an `LRFD` design-format and revision block.
+3. `seismic_calculations.xlsx` — Complete calculation package across the six required sheets (`WEIGHTS`, `BASE_SHEAR`, `DIAPHRAGM_FORCES`, `WALL_FORCES`, `PARAPET_ANCHORAGE`, `CHORD_FORCES`).
+4. `constraint_register.xlsx` — Comprehensive 55-row constraint register (`CONSTRAINT REGISTER`) citing the governing project documents (`SDC-02` Sections 1–11, `OBD-CDDC-B` Sections 1.4, 2.2, 3.1 & 5.6, `GEO-2026-071` Sections 4 & 9, `USGS_ASCE7-22_RiskCatIII_SiteClassD_46.6832_-111.9756.json`, `A-101` Rev 3, `S-201` Rev 2, `PC-101` Rev 2, `PC-301` Rev 2, `M-601` Rev 3, `ERL-2026-08`, `PCS-014`, `RFI-041`, `CDDC-SV-2026-041` Sections 2–4, `CP_control_points.csv`, `ScanB_2026-08-07_interior.ply`, `PR-07`, `DAP-2` Sections 1–6 & Appendix A `VP-1`, `ERC-07` Sections 2–4, `BDS-2026-DT` Rev 3, `RPC-CAT-2026` Rev 5, `PROC-114` Rev 2) and governing codes/standards (`2024 IBC`, `ASCE/SEI 7-22`, `FEMA P-2082-1`, `FEMA P-2192-V1`, `UFC 3-301-01`, `ACI 318-19`, `AISC 360-22`, `AISI S310-20`, `29 CFR 1926.704`, `ASCE/SEI 37-14`), with zero superseded or Building A references.
+5. `design_basis.md` — Narrative design basis covering all nine required topics (`1. Selected seismic force-resisting system`, `2. Governing seismic parameters and effective seismic weight`, `3. Document conflicts identified and resolved`, `4. Diaphragm shear, attachment zones, chords and collectors`, `5. Wall line forces, panel connections and base anchorage`, `6. Parapet inertia and out-of-plane wall anchorage`, `7. Governing constraint per wall line`, `8. Alternatives considered and rejected`, `9. Installed cost vs budget`).
+
+---
+
+### Summary of Key Engineering Results
+
+* **Seismic Basis & SFRS Selection (`SDC-02` Sections 1–4 & 9, `OBD-CDDC-B` Section 1.4, `GEO-2026-071` Section 4)**:
+  * **SFRS**: Bearing Wall System — **Intermediate Precast Concrete Shear Walls** (`sfrs = "intermediate_precast"`), **`design_format = "LRFD"`**, **$R = 4.0$**, **$\Omega_0 = 2.5$**, **$\Omega_{0,\text{collector}} = 2.0$** (`ASCE/SEI 7-22` Table 12.2-1 Footnote b for flexible diaphragms), **$C_d = 4.0$**, eligible in SDC D up to $h_n \le 40\text{ ft}$ (actual $h_n = 28.0\text{ ft}$).
+  * **Risk Category & Hazard**: **Risk Category III** ($I_e = 1.25$, governed by the 911 emergency communications tenant per `OBD-CDDC-B` Section 1.4), **Site Class D** ($V_{s,100} = 905\text{ ft/s}$ in boring B-204 per `GEO-2026-071` Section 4), **$S_{DS} = 0.44\text{ g}$**, **$S_{D1} = 0.24\text{ g}$**, **SDC D**, $T_a = 0.020(28.0)^{0.75} = \mathbf{0.2436\text{ s}}$, and **$C_s = 0.1375$**.
+* **Effective Seismic Weight & Base Shear (`A-101` Rev 3, `M-601` Rev 3, `OBD-CDDC-B` Section 2.2, `SDC-02` Sections 6 & 8)**:
+  * **Net Roof Dead Load**: $(240\times 180 - 60\times 40 - 80\times 20)\times 20\text{ psf} = 39,200\text{ ft}^2 \times 20\text{ psf} = \mathbf{784.00\text{ kips}}$.
+  * **Rooftop Units**: Phase 1 installed (`RTU-1`–`RTU-6`) $= \mathbf{45.00\text{ kips}}$; Phase 2 future (`RTU-7F`, `RTU-8F`) $= +16.00\text{ kips}$ ($61.00\text{ kips}$ total).
+  * **Tributary Exterior Precast Walls**: $h_{\text{trib}} = \frac{H^2}{2h} = \frac{31.0^2}{2\times 28.0} = 17.160714\text{ ft} \implies w_{\text{wall}} = \mathbf{1,716.0714\text{ plf}}$ ($1,400.00\text{ plf}$ below roof $+ \mathbf{316.0714\text{ plf}}$ parapet cantilever transfer above roof); North & South walls $= \mathbf{823.71\text{ kips}}$ ($411.86\text{ kips}$ each); East & West walls $= \mathbf{617.79\text{ kips}}$ ($308.89\text{ kips}$ each).
+  * **Total Effective Seismic Weight & Base Shear**:
+    * **Base (Phase 1, `S01`–`S06`)**: $W = \mathbf{2,270.50\text{ kips}}$, $V = C_s W = \mathbf{312.19\text{ kips}}$.
+    * **Future (Phase 1 + Phase 2, `S07`–`S10`)**: $W_{\text{future}} = \mathbf{2,286.50\text{ kips}}$, $V_{\text{future}} = \mathbf{314.39\text{ kips}}$.
+* **Diaphragm Shears & Attachment Zones (`SDC-02` Sections 5, 7 & 10, `PR-07`, `DAP-2`, `BDS-2026-DT` Table 4)**:
+  * **Method**: `"ASCE 7-22 12.10.1 and 12.10.2"`.
+  * **Tributary Diaphragm Distributed Load $w_{px}$**:
+    * **E-W (X-Direction)**: $F_{px,X} = \mathbf{198.93\text{ kips}}$, $w_{px,X} = \mathbf{1,105.18\text{ plf}}$ (Base); $F_{px,X} = 201.13\text{ kips}$, $w_{px,X} = 1,117.41\text{ plf}$ (Future); $F_{px,X} = 62.97\text{ kips}$, $w_{px,X} = 349.82\text{ plf}$ (Erection `S11`).
+    * **N-S (Y-Direction)**: $F_{px,Y} = \mathbf{227.25\text{ kips}}$, $w_{px,Y} = \mathbf{946.87\text{ plf}}$ (Base); $F_{px,Y} = 229.45\text{ kips}$, $w_{px,Y} = 956.05\text{ plf}$ (Future); $F_{px,Y} = 84.20\text{ kips}$, $w_{px,Y} = 467.77\text{ plf}$ (Erection `S12`).
+  * **Zone Assignments & 3-Idealization Envelope Unit Shears (`S01`–`S12`)**:
+    * `Z1`: **`P5`** ($\phi S_n = 1,101\text{ plf}, G' = 61.0\text{ kip/in}$), $v_u = \mathbf{985.3\text{ plf}}$
+    * `Z2, Z3, Z10, Z11`: **`P3`** ($\phi S_n = 663\text{ plf}, G' = 38.0\text{ kip/in}$), $v_u = \mathbf{515.1, 567.7, 571.6, 515.5\text{ plf}}$
+    * `Z4, Z5, Z8, Z9, Z12`: **`P4`** ($\phi S_n = 852\text{ plf}, G' = 49.0\text{ kip/in}$), $v_u = \mathbf{763.2, 745.4, 738.0, 691.5, 748.5\text{ plf}}$
+    * `Z6, Z7`: **`P2`** ($\phi S_n = 474\text{ plf}, G' = 26.5\text{ kip/in}$), $v_u = \mathbf{387.5, 439.9\text{ plf}}$
+    * Maximum amplified top-of-panel deflection from the semi-rigid model $= \mathbf{3.23\text{ in}} \le 4.00\text{ in}$ (`SDC-02` Section 7, `OBD-CDDC-B` Section 3.1).
+* **Envelope Wall Forces $F_x$ (`S01`–`S12`), Chords, Collectors, Connections & Anchorage**:
+  * **Maximum Wall Line Shear Forces**: `S` $= \mathbf{113.25\text{ kips}}$ (`S09`), `N` $= \mathbf{121.02\text{ kips}}$ (`S07`), `W` $= \mathbf{130.92\text{ kips}}$ (`S10`), `E` $= \mathbf{131.69\text{ kips}}$ (`S08`).
+  * **Chords, Collectors & Drag Struts**: **`C1` (`L4x4x3/8`, $\phi P_n = 92.66\text{ kips}$)** on all 20 lines (`CH-S/N` $= 55.75\text{ kips}$, `CH-W/E` $= 23.77\text{ kips}$, max $\Omega_{0,\text{coll}}$-amplified drag strut `DR-S2` $= 46.88\text{ kips}$, max opening collector `OP-2S/N` $= 42.10\text{ kips}$).
+  * **Panel Connections & Base Tie-Downs**: **`JC1` (`RPC-24`, $\phi V_n = 18.0\text{ kips}$)** with $1\text{ connector/joint}$ on all walls (max joint shear $= 4.77\text{ kips}$); **`BA1` ($\phi T_n = 33.0\text{ kips}$)** on `N` (max demand $= 29.02\text{ kips}$) and **`BA2` ($\phi T_n = 66.0\text{ kips}$)** on `S`, `W`, and `E` (max demands $= 47.17, 47.39, 40.87\text{ kips}$).
+  * **Parapet Transfer & Out-of-Plane Wall Anchorage**: `parapet_transfer_plf` $= \mathbf{316.07\text{ plf}}$, $k_a = 2.0$ (both directions), governing out-of-plane anchorage force $F_p = 0.2 k_a I_e w_p = \mathbf{858.04\text{ plf}}$ (`158.04 plf` from parapet transfer), resisted by **`WA1` ($\phi T_n = 7.05\text{ kips}$) at $8\text{ ft}$ o.c.** ($6.86\text{ kips/anchor} \le 7.05\text{ kips}$) with $30\text{ ft} \times 15\text{ ft}$ subdiaphragms ($2.0 \le 2.5$).
+* **Installed Cost vs Budget (`PROC-114` Rev 2, `OBD-CDDC-B` Section 5.6, `SDC-02` Section 11)**:
+  * **Total Installed Cost**: **$\$334,262.60$** (SFRS panels $\$148,000.00 +$ deck attachment $\$70,897.60 +$ chords/collectors $\$23,712.00 +$ joint connectors $\$22,715.00 +$ base tie-downs $\$58,860.00 +$ wall anchors $\$10,080.00$), saving **$\$60,737.40$ ($15.4\%$)** below the Owner's $\$395,000.00$ hard capital budget cap.
